@@ -6,7 +6,8 @@ const state = {
   viewYear: new Date().getFullYear(),
   viewMonth: new Date().getMonth(), // 0-indexed
   selectedDate: null, // "YYYY-MM-DD"
-  records: loadRecords(),
+  records: {},
+  uid: null,
 };
 
 const els = {
@@ -23,20 +24,26 @@ const els = {
   doneBtn: document.getElementById("doneBtn"),
   clearDayBtn: document.getElementById("clearDayBtn"),
   toast: document.getElementById("toast"),
+  stage: document.getElementById("stage"),
+  authGate: document.getElementById("authGate"),
+  authSubtitle: document.getElementById("authSubtitle"),
+  authError: document.getElementById("authError"),
+  loginForm: document.getElementById("loginForm"),
+  loginEmail: document.getElementById("loginEmail"),
+  loginPassword: document.getElementById("loginPassword"),
+  loginBtn: document.getElementById("loginBtn"),
+  userEmail: document.getElementById("userEmail"),
+  logoutBtn: document.getElementById("logoutBtn"),
 };
 
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
-function loadRecords() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
 function saveRecords() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records));
+  if (!state.uid) return;
+  window.otterFirestore.save(state.uid, state.records).catch((err) => {
+    console.error(err);
+    showToast("저장에 실패했어요. 다시 시도해주세요.");
+  });
 }
 
 function pad(n) {
@@ -325,6 +332,93 @@ els.modalBackdrop.addEventListener("click", (e) => {
 });
 
 renderAll();
+
+// ---------- Auth ----------
+let unsubscribeFirestore = null;
+
+function showAuthGate(message) {
+  els.stage.hidden = true;
+  els.authGate.hidden = false;
+  els.loginForm.hidden = false;
+  els.authSubtitle.textContent = message || "로그인하고 기록을 시작하세요";
+}
+
+function showApp() {
+  els.authGate.hidden = true;
+  els.stage.hidden = false;
+}
+
+function migrateLocalRecordsIfNeeded() {
+  try {
+    const local = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (local && Object.keys(local).length > 0) {
+      state.records = local;
+      saveRecords();
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // ignore malformed local data
+  }
+}
+
+window.handleAuthUser = function (user, allowed) {
+  if (unsubscribeFirestore) {
+    unsubscribeFirestore();
+    unsubscribeFirestore = null;
+  }
+
+  if (!user) {
+    state.uid = null;
+    state.records = {};
+    showAuthGate();
+    return;
+  }
+
+  if (!allowed) {
+    showAuthGate("이 계정은 사용할 수 없습니다.");
+    window.otterAuth.signOut();
+    return;
+  }
+
+  state.uid = user.uid;
+  els.userEmail.textContent = user.email;
+  showApp();
+
+  let firstSnapshot = true;
+  unsubscribeFirestore = window.otterFirestore.subscribe(user.uid, (records) => {
+    if (firstSnapshot && Object.keys(records).length === 0) {
+      firstSnapshot = false;
+      migrateLocalRecordsIfNeeded();
+      return;
+    }
+    firstSnapshot = false;
+    state.records = records;
+    renderCalendar();
+    renderStats();
+  });
+};
+
+els.loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = els.loginEmail.value.trim();
+  const password = els.loginPassword.value;
+  els.authError.textContent = "";
+  els.loginBtn.disabled = true;
+  els.loginBtn.textContent = "로그인 중...";
+  window.otterAuth
+    .signIn(email, password)
+    .catch(() => {
+      els.authError.textContent = "이메일 또는 비밀번호가 올바르지 않습니다.";
+    })
+    .finally(() => {
+      els.loginBtn.disabled = false;
+      els.loginBtn.textContent = "로그인";
+    });
+});
+
+els.logoutBtn.addEventListener("click", () => {
+  window.otterAuth.signOut();
+});
 
 // ---------- Service worker ----------
 if ("serviceWorker" in navigator) {

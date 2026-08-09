@@ -26,7 +26,21 @@
   </defs>
 </svg>
 
-<div class="stage">
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">🦦</div>
+    <h1 class="jua">수댕이 Challenge</h1>
+    <p class="subtitle" id="authSubtitle">불러오는 중...</p>
+    <form id="loginForm" class="auth-form" hidden>
+      <input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="username" required />
+      <input type="password" id="loginPassword" placeholder="비밀번호" autocomplete="current-password" required />
+      <button type="submit" id="loginBtn">로그인</button>
+      <p class="auth-error" id="authError"></p>
+    </form>
+  </div>
+</div>
+
+<div class="stage" id="stage" hidden>
 <div class="app">
   <svg class="wave-bg" viewBox="0 0 380 700" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0 0 H380 V22 Q285 40 190 22 T0 22 Z" fill="#ffffff" opacity="0.5"/>
@@ -41,6 +55,11 @@
   </svg>
 
   <div class="app-inner">
+    <div class="user-bar">
+      <span id="userEmail"></span>
+      <button id="logoutBtn" type="button">로그아웃</button>
+    </div>
+
     <header class="app-header">
       <h1>수댕이 Challenge</h1>
       <p class="subtitle">넌 할 수 있어!</p>
@@ -95,5 +114,55 @@
 <div class="toast" id="toast"></div>
 
 <script src="app.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, signOut,
+    onAuthStateChanged, setPersistence, browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyChgCt6VctuqUiUh8VfMviqtVVw55QCgdg",
+    authDomain: "sudaengi-challenge.firebaseapp.com",
+    projectId: "sudaengi-challenge",
+    storageBucket: "sudaengi-challenge.firebasestorage.app",
+    messagingSenderId: "791126513565",
+    appId: "1:791126513565:web:f3c8114989ddf07476c174"
+  };
+
+  // Keep in sync with the allow-list enforced server-side in firestore.rules.
+  const ALLOWED_EMAILS = ['seadeang91@gmail.com', 'yoodaisy1226@gmail.com', 'everfr2e@gmail.com'];
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  enableIndexedDbPersistence(db).catch(() => {});
+
+  window.otterAuth = {
+    signIn: (email, password) =>
+      setPersistence(auth, browserLocalPersistence).then(() => signInWithEmailAndPassword(auth, email, password)),
+    signOut: () => signOut(auth),
+  };
+
+  window.otterFirestore = {
+    subscribe(uid, cb) {
+      return onSnapshot(doc(db, "challengeRecords", uid), (snap) => {
+        cb(snap.exists() ? snap.data().records || {} : {});
+      });
+    },
+    save(uid, records) {
+      return setDoc(doc(db, "challengeRecords", uid), { records, updatedAt: Date.now() });
+    },
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    const allowed = !!user && ALLOWED_EMAILS.includes(user.email);
+    window.handleAuthUser(user, allowed);
+  });
+</script>
 </body>
 </html>

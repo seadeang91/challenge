@@ -1,4 +1,4 @@
-const CACHE_NAME = "daily-challenge-v5";
+const CACHE_NAME = "daily-challenge-v6";
 const ASSETS = [
   "./",
   "./index.html",

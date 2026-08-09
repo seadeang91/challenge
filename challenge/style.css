@@ -62,6 +62,10 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   min-height: 100dvh;
 }
 
+.stage[hidden] {
+  display: none;
+}
+
 .app {
   width: 100%;
   max-width: 420px;
@@ -75,7 +79,7 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 @media (max-width: 480px) {
   .stage { padding: 0; }
   .app { border-radius: 0; box-shadow: none; min-height: 100dvh; max-width: 100%; }
-  .app-header { padding-top: calc(30px + env(safe-area-inset-top)); }
+  .user-bar { padding-top: calc(14px + env(safe-area-inset-top)); }
   .app-inner { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 }
 
@@ -92,6 +96,27 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   position: relative;
   z-index: 1;
   padding-bottom: 24px;
+}
+
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.user-bar #logoutBtn {
+  background: var(--card);
+  border: none;
+  color: var(--ink);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
 }
 
 .app-header {
@@ -274,6 +299,96 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   0% { transform: scale(1.6); opacity: 0; }
   70% { transform: scale(0.92); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* Auth gate */
+.auth-gate {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, var(--sky1) 0%, var(--sky2) 40%, var(--sky3) 100%);
+}
+
+.auth-gate[hidden] {
+  display: none;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--card-solid);
+  border-radius: 28px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.auth-logo {
+  font-size: 2.4rem;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+.auth-card .subtitle {
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-form[hidden] {
+  display: none;
+}
+
+.auth-form input {
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--accent-bg);
+  background: rgba(47, 111, 237, 0.05);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-form button {
+  margin-top: 4px;
+  padding: 13px 0;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.auth-error {
+  min-height: 18px;
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--fail);
 }
 
 /* Modal */
