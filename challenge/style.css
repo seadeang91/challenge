@@ -118,7 +118,7 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 }
 
 @media (max-width: 480px) {
-  .user-bar { padding-top: calc(56px + env(safe-area-inset-top)); }
+  .user-bar { padding-top: calc(8px + env(safe-area-inset-top)); }
   .app-inner { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 }
 
@@ -171,6 +171,11 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 
 .calendar-card {
   padding: 8px 8px 4px;
+  margin-top: 12px;
+}
+
+@media (max-width: 480px) {
+  .calendar-card { margin-top: 48px; }
 }
 
 .calendar-nav {
