@@ -79,7 +79,7 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 @media (max-width: 480px) {
   .stage { padding: 0; }
   .app { border-radius: 0; box-shadow: none; min-height: 100dvh; max-width: 100%; }
-  .user-bar { padding-top: calc(20px + env(safe-area-inset-top)); }
+  .user-bar { padding-top: calc(56px + env(safe-area-inset-top)); }
   .app-inner { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 }
 
