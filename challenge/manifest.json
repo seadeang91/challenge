@@ -1,6 +1,6 @@
 {
   "name": "수댕이 Challenge",
-  "short_name": "수댕이 챌린지",
+  "short_name": "challenge",
   "description": "학교와 학원 챌린지를 매일 기록하는 수댕이 캘린더 앱",
   "start_url": "./index.html",
   "scope": "./",
