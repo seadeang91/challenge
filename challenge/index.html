@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>수댕이 Challenge</title>
+<meta name="description" content="학교와 학원 챌린지를 매일 기록하는 수댕이 캘린더 앱" />
+<meta name="theme-color" content="#9ad4f7" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="수댕이 Challenge" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <clipPath id="otterClip" clipPathUnits="objectBoundingBox">
+      <circle cx="0.5" cy="0.5" r="0.5" />
+    </clipPath>
+  </defs>
+</svg>
+
+<div class="stage">
+<div class="app">
+  <svg class="wave-bg" viewBox="0 0 380 700" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 0 H380 V22 Q285 40 190 22 T0 22 Z" fill="#ffffff" opacity="0.5"/>
+    <circle cx="40" cy="120" r="16" fill="#ffffff" opacity="0.35"/>
+    <circle cx="70" cy="90" r="8" fill="#ffffff" opacity="0.3"/>
+    <circle cx="335" cy="200" r="20" fill="#ffffff" opacity="0.3"/>
+    <circle cx="310" cy="250" r="9" fill="#ffffff" opacity="0.3"/>
+    <circle cx="55" cy="520" r="14" fill="#ffffff" opacity="0.3"/>
+    <circle cx="30" cy="560" r="7" fill="#ffffff" opacity="0.25"/>
+    <circle cx="340" cy="610" r="18" fill="#ffffff" opacity="0.3"/>
+    <circle cx="300" cy="650" r="9" fill="#ffffff" opacity="0.25"/>
+  </svg>
+
+  <div class="app-inner">
+    <header class="app-header">
+      <h1>수댕이 Challenge</h1>
+      <p class="subtitle">넌 할 수 있어!</p>
+    </header>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="calendar-card">
+      <div class="calendar-nav">
+        <button id="prevMonth" class="nav-btn" aria-label="이전 달">‹</button>
+        <h2 id="monthLabel"></h2>
+        <button id="nextMonth" class="nav-btn" aria-label="다음 달">›</button>
+      </div>
+      <div class="weekdays" id="weekdays"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+  </div>
+</div>
+</div>
+
+<!-- 날짜 클릭 모달 -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDate">
+    <button class="modal-close" id="modalClose" aria-label="닫기">×</button>
+    <h3 id="modalDate"></h3>
+
+    <div class="category" data-category="school">
+      <div class="category-label">🏫 학교</div>
+      <div class="btn-group">
+        <button class="choice success" data-value="success">성공</button>
+        <button class="choice fail" data-value="fail">실패</button>
+      </div>
+    </div>
+
+    <div class="category" data-category="academy">
+      <div class="category-label">📚 학원</div>
+      <div class="btn-group">
+        <button class="choice success" data-value="success">성공</button>
+        <button class="choice fail" data-value="fail">실패</button>
+      </div>
+    </div>
+
+    <div class="modal-result" id="modalResult"></div>
+
+    <div class="modal-actions">
+      <button class="clear-btn" id="clearDayBtn" type="button">기록 지우기</button>
+      <button class="close-btn" id="doneBtn" type="button">완료</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "수댕이 Challenge",
+  "short_name": "수댕이 챌린지",
+  "description": "학교와 학원 챌린지를 매일 기록하는 수댕이 캘린더 앱",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#dff3ff",
+  "theme_color": "#9ad4f7",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
