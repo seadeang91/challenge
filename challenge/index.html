@@ -122,7 +122,7 @@
     onAuthStateChanged, setPersistence, browserLocalPersistence
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence
+    getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -137,6 +137,9 @@
   // Keep in sync with the allow-list enforced server-side in firestore.rules.
   const ALLOWED_EMAILS = ['seadeang91@gmail.com', 'yoodaisy1226@gmail.com', 'everfr2e@gmail.com'];
 
+  // All allowed accounts read/write this single shared document.
+  const SHARED_DOC_ID = 'shared';
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -149,13 +152,18 @@
   };
 
   window.otterFirestore = {
-    subscribe(uid, cb) {
-      return onSnapshot(doc(db, "challengeRecords", uid), (snap) => {
+    subscribe(cb) {
+      return onSnapshot(doc(db, "challengeRecords", SHARED_DOC_ID), (snap) => {
         cb(snap.exists() ? snap.data().records || {} : {});
       });
     },
-    save(uid, records) {
-      return setDoc(doc(db, "challengeRecords", uid), { records, updatedAt: Date.now() });
+    save(records) {
+      return setDoc(doc(db, "challengeRecords", SHARED_DOC_ID), { records, updatedAt: Date.now() });
+    },
+    // One-time migration helper: reads the old per-account document (pre-shared-calendar).
+    async fetchLegacyRecords(uid) {
+      const snap = await getDoc(doc(db, "challengeRecords", uid));
+      return snap.exists() ? snap.data().records || {} : {};
     },
   };
 

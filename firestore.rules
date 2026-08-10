@@ -1,8 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Single shared document all allowed accounts read/write together.
+    // Keep this email list in sync with ALLOWED_EMAILS in challenge/index.html.
+    match /challengeRecords/shared {
+      allow read, write: if request.auth != null &&
+        request.auth.token.email in [
+          'seadeang91@gmail.com',
+          'yoodaisy1226@gmail.com',
+          'everfr2e@gmail.com'
+        ];
+    }
+
+    // Legacy per-account documents from before the shared calendar. Read-only,
+    // kept so each account can migrate its old data into the shared doc once.
     match /challengeRecords/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
     }
   }
 }

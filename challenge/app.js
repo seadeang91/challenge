@@ -40,7 +40,7 @@ const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function saveRecords() {
   if (!state.uid) return;
-  window.otterFirestore.save(state.uid, state.records).catch((err) => {
+  window.otterFirestore.save(state.records).catch((err) => {
     console.error(err);
     showToast("저장에 실패했어요. 다시 시도해주세요.");
   });
@@ -361,6 +361,22 @@ function migrateLocalRecordsIfNeeded() {
   }
 }
 
+// One-time migration from the old per-account document (pre-shared-calendar) into
+// the shared doc, run only when the shared doc is still empty.
+async function migrateLegacyRecordsIfNeeded(uid) {
+  try {
+    const legacy = await window.otterFirestore.fetchLegacyRecords(uid);
+    if (legacy && Object.keys(legacy).length > 0) {
+      state.records = legacy;
+      saveRecords();
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  migrateLocalRecordsIfNeeded();
+}
+
 window.handleAuthUser = function (user, allowed) {
   if (unsubscribeFirestore) {
     unsubscribeFirestore();
@@ -385,10 +401,10 @@ window.handleAuthUser = function (user, allowed) {
   showApp();
 
   let firstSnapshot = true;
-  unsubscribeFirestore = window.otterFirestore.subscribe(user.uid, (records) => {
+  unsubscribeFirestore = window.otterFirestore.subscribe((records) => {
     if (firstSnapshot && Object.keys(records).length === 0) {
       firstSnapshot = false;
-      migrateLocalRecordsIfNeeded();
+      migrateLegacyRecordsIfNeeded(user.uid);
       return;
     }
     firstSnapshot = false;
