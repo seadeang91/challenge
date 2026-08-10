@@ -68,6 +68,12 @@ function dayStatus(key) {
   return "none";
 }
 
+function isHalfSuccess(key) {
+  const r = state.records[key];
+  if (!r) return false;
+  return (r.school === "success") !== (r.academy === "success");
+}
+
 function renderWeekdays() {
   els.weekdays.innerHTML = WEEKDAY_LABELS.map((w) => `<span>${w}</span>`).join("");
 }
@@ -175,16 +181,16 @@ function renderStats() {
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
-  const thisWeekCount = keys.filter((k) => {
+  const weekHalfSuccessCount = keys.filter((k) => {
     const [y, m, d] = k.split("-").map(Number);
     const date = new Date(y, m - 1, d);
-    return date >= weekStart && date <= weekEnd && dayStatus(k) === "stamped";
+    return date >= weekStart && date <= weekEnd && isHalfSuccess(k);
   }).length;
 
   els.stats.innerHTML = `
     <div class="stat-box">
-      <div class="label">이번주 성공</div>
-      <div class="num">${thisWeekCount}회</div>
+      <div class="label">절반의 성공</div>
+      <div class="num">${weekHalfSuccessCount}회</div>
     </div>
     <div class="stat-box">
       <div class="label">이번달 성공</div>
