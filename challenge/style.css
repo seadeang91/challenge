@@ -256,6 +256,10 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   color: var(--fail);
 }
 
+.day-cell.holiday:not(.today):not(.partial) .plainday {
+  color: var(--fail);
+}
+
 .day-cell .status-dot {
   position: absolute;
   bottom: 2px;
@@ -307,6 +311,49 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   0% { transform: scale(1.6); opacity: 0; }
   70% { transform: scale(0.92); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+.stamp-ring.landing {
+  animation: stampLanding 0.7s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes stampLanding {
+  0% {
+    transform: translate(46%, -210%) rotate(calc(var(--rest-rot) - 55deg)) scale(1.5);
+    opacity: 0;
+  }
+  28% {
+    opacity: 1;
+  }
+  56% {
+    transform: translate(-4%, 5%) rotate(calc(var(--rest-rot) + 12deg)) scale(1.12);
+  }
+  72% {
+    transform: translate(0, -1.5%) rotate(calc(var(--rest-rot) - 5deg)) scale(0.93);
+  }
+  86% {
+    transform: translate(0, 0.5%) rotate(calc(var(--rest-rot) + 2deg)) scale(1.02);
+  }
+  100% {
+    transform: translate(0, 0) rotate(var(--rest-rot)) scale(1);
+    opacity: 1;
+  }
+}
+
+.stamp-impact {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--stamp-ring);
+  opacity: 0;
+  pointer-events: none;
+  animation: stampImpactRing 0.5s ease-out 0.38s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes stampImpactRing {
+  0% { transform: scale(0.55); opacity: 0.85; }
+  100% { transform: scale(1.7); opacity: 0; }
 }
 
 /* Auth gate */
@@ -550,4 +597,18 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 80;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  will-change: transform, opacity;
 }

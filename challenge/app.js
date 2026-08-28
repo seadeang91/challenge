@@ -8,6 +8,7 @@ const state = {
   selectedDate: null, // "YYYY-MM-DD"
   records: {},
   uid: null,
+  justStampedKey: null, // date key whose stamp should play the landing animation
 };
 
 const els = {
@@ -24,6 +25,7 @@ const els = {
   doneBtn: document.getElementById("doneBtn"),
   clearDayBtn: document.getElementById("clearDayBtn"),
   toast: document.getElementById("toast"),
+  confettiLayer: document.getElementById("confettiLayer"),
   stage: document.getElementById("stage"),
   authGate: document.getElementById("authGate"),
   authSubtitle: document.getElementById("authSubtitle"),
@@ -37,6 +39,87 @@ const els = {
 };
 
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+// Korean public holidays (source: 네이버 캘린더), including 대체공휴일/임시공휴일.
+const HOLIDAYS = {
+  "2024-01-01": "신정",
+  "2024-02-09": "설날 연휴",
+  "2024-02-10": "설날",
+  "2024-02-11": "설날 연휴",
+  "2024-02-12": "대체공휴일",
+  "2024-03-01": "삼일절",
+  "2024-05-05": "어린이날",
+  "2024-05-06": "대체공휴일",
+  "2024-05-15": "부처님오신날",
+  "2024-06-06": "현충일",
+  "2024-08-15": "광복절",
+  "2024-09-16": "추석 연휴",
+  "2024-09-17": "추석",
+  "2024-09-18": "추석 연휴",
+  "2024-10-03": "개천절",
+  "2024-10-09": "한글날",
+  "2024-12-25": "성탄절",
+
+  "2025-01-01": "신정",
+  "2025-01-27": "임시공휴일",
+  "2025-01-28": "설날 연휴",
+  "2025-01-29": "설날",
+  "2025-01-30": "설날 연휴",
+  "2025-03-01": "삼일절",
+  "2025-03-03": "대체공휴일",
+  "2025-05-05": "어린이날·부처님오신날",
+  "2025-05-06": "대체공휴일",
+  "2025-06-03": "임시공휴일",
+  "2025-06-06": "현충일",
+  "2025-08-15": "광복절",
+  "2025-10-03": "개천절",
+  "2025-10-06": "추석 연휴",
+  "2025-10-07": "추석",
+  "2025-10-08": "대체공휴일",
+  "2025-10-09": "한글날",
+  "2025-12-25": "성탄절",
+
+  "2026-01-01": "신정",
+  "2026-02-16": "설날 연휴",
+  "2026-02-17": "설날",
+  "2026-02-18": "설날 연휴",
+  "2026-03-01": "삼일절",
+  "2026-03-02": "대체공휴일",
+  "2026-05-05": "어린이날",
+  "2026-05-24": "부처님오신날",
+  "2026-05-25": "대체공휴일",
+  "2026-06-06": "현충일",
+  "2026-08-15": "광복절",
+  "2026-08-17": "대체공휴일",
+  "2026-09-24": "추석 연휴",
+  "2026-09-25": "추석",
+  "2026-09-26": "추석 연휴",
+  "2026-10-03": "개천절",
+  "2026-10-05": "대체공휴일",
+  "2026-10-09": "한글날",
+  "2026-12-25": "성탄절",
+
+  "2027-01-01": "신정",
+  "2027-02-06": "설날 연휴",
+  "2027-02-07": "설날",
+  "2027-02-08": "설날 연휴",
+  "2027-02-09": "대체공휴일",
+  "2027-03-01": "삼일절",
+  "2027-05-05": "어린이날",
+  "2027-05-13": "부처님오신날",
+  "2027-06-06": "현충일",
+  "2027-08-15": "광복절",
+  "2027-08-16": "대체공휴일",
+  "2027-09-14": "추석 연휴",
+  "2027-09-15": "추석",
+  "2027-09-16": "추석 연휴",
+  "2027-10-03": "개천절",
+  "2027-10-04": "대체공휴일",
+  "2027-10-09": "한글날",
+  "2027-10-11": "대체공휴일",
+  "2027-12-25": "성탄절",
+  "2027-12-27": "대체공휴일",
+};
 
 function saveRecords() {
   if (!state.uid) return;
@@ -66,12 +149,6 @@ function dayStatus(key) {
   if (both) return "stamped";
   if (r.school || r.academy) return "partial";
   return "none";
-}
-
-function isHalfSuccess(key) {
-  const r = state.records[key];
-  if (!r) return false;
-  return (r.school === "success") !== (r.academy === "success");
 }
 
 function renderWeekdays() {
@@ -120,14 +197,21 @@ function renderCalendar() {
     if (key === todayKey) div.classList.add("today");
     if (status === "stamped") div.classList.add("stamped");
     if (status === "partial") div.classList.add("partial");
+    if (HOLIDAYS[key]) {
+      div.classList.add("holiday");
+      div.title = HOLIDAYS[key];
+    }
 
     if (status === "stamped") {
       const wrap = document.createElement("div");
       wrap.className = "stampwrap";
+      const isLanding = key === state.justStampedKey;
+      const rot = stampRotation(key);
       wrap.innerHTML = `
-        <div class="stamp-ring" style="transform:rotate(${stampRotation(key)}deg);">
+        <div class="stamp-ring${isLanding ? " landing" : ""}" style="${isLanding ? `--rest-rot:${rot}deg;` : `transform:rotate(${rot}deg);`}">
           <img src="${OTTER_IMG}" alt="성공 도장" />
         </div>
+        ${isLanding ? '<div class="stamp-impact"></div>' : ""}
       `;
       div.appendChild(wrap);
     } else {
@@ -156,9 +240,15 @@ function renderCalendar() {
 function renderStats() {
   const keys = Object.keys(state.records);
 
-  let streak = 0;
+  // Current streak ending today. If today hasn't been recorded yet, an
+  // in-progress "today" shouldn't zero out a real streak from prior days.
   const cursor = new Date(state.today);
   cursor.setHours(0, 0, 0, 0);
+  const todayKey = dateKey(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+  if (dayStatus(todayKey) !== "stamped") {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  let streak = 0;
   while (true) {
     const key = dateKey(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
     if (dayStatus(key) === "stamped") {
@@ -168,6 +258,7 @@ function renderStats() {
       break;
     }
   }
+  if (streak < 2) streak = 0;
 
   const todayY = state.today.getFullYear();
   const todayM = state.today.getMonth() + 1;
@@ -176,21 +267,18 @@ function renderStats() {
     return y === todayY && m === todayM && dayStatus(k) === "stamped";
   }).length;
 
-  const weekStart = new Date(state.today);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  const weekHalfSuccessCount = keys.filter((k) => {
-    const [y, m, d] = k.split("-").map(Number);
-    const date = new Date(y, m - 1, d);
-    return date >= weekStart && date <= weekEnd && isHalfSuccess(k);
-  }).length;
+  // Weekdays (Mon-Fri) so far this month with no recorded status at all.
+  let unmarkedWeekdayCount = 0;
+  for (let d = 1; d <= state.today.getDate(); d++) {
+    const dow = new Date(todayY, todayM - 1, d).getDay();
+    if (dow === 0 || dow === 6) continue;
+    if (dayStatus(dateKey(todayY, todayM - 1, d)) === "none") unmarkedWeekdayCount++;
+  }
 
   els.stats.innerHTML = `
     <div class="stat-box">
-      <div class="label">절반의 성공</div>
-      <div class="num">${weekHalfSuccessCount}회</div>
+      <div class="label">확인해주세요</div>
+      <div class="num">${unmarkedWeekdayCount}일</div>
     </div>
     <div class="stat-box">
       <div class="label">이번달 성공</div>
@@ -214,7 +302,11 @@ function renderAll() {
 
 // ---------- Modal ----------
 
+let pendingConfetti = false;
+
 function openModal(key) {
+  pendingConfetti = false;
+  state.justStampedKey = null;
   state.selectedDate = key;
   const [y, m, d] = key.split("-").map(Number);
   const dateObj = new Date(y, m - 1, d);
@@ -236,6 +328,12 @@ function openModal(key) {
 function closeModal() {
   els.modalBackdrop.classList.remove("open");
   state.selectedDate = null;
+  if (pendingConfetti) {
+    pendingConfetti = false;
+    renderCalendar();
+    fireConfetti();
+  }
+  state.justStampedKey = null;
 }
 
 function updateModalResult() {
@@ -276,13 +374,20 @@ function setChoice(category, value) {
   renderStats();
 
   if (record.school === "success" && record.academy === "success") {
+    pendingConfetti = true;
+    state.justStampedKey = key;
     showToast("🦦 수댕이 도장 획득! 오늘도 성공!");
+  } else {
+    pendingConfetti = false;
+    state.justStampedKey = null;
   }
 }
 
 function clearDay() {
   const key = state.selectedDate;
   if (!key) return;
+  pendingConfetti = false;
+  state.justStampedKey = null;
   delete state.records[key];
   saveRecords();
   document.querySelectorAll(".choice").forEach((btn) => btn.classList.remove("active"));
@@ -290,6 +395,49 @@ function clearDay() {
   renderCalendar();
   renderStats();
   showToast("기록을 지웠어요");
+}
+
+// ---------- Confetti ----------
+const CONFETTI_COLORS = ["#ff8a45", "#2f6fed", "#ffd23f", "#ff6a8a", "#4fd1a5", "#8a5a34"];
+
+function fireConfetti() {
+  const layer = els.confettiLayer;
+  if (!layer) return;
+
+  ["left", "right"].forEach((side) => {
+    const dir = side === "left" ? 1 : -1;
+    for (let i = 0; i < 26; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+
+      const size = 6 + Math.random() * 6;
+      piece.style.width = `${size}px`;
+      piece.style.height = `${size * (Math.random() < 0.5 ? 1 : 0.6)}px`;
+      piece.style.borderRadius = Math.random() < 0.5 ? "50%" : "2px";
+      piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      piece.style.left = side === "left" ? "0" : "auto";
+      piece.style.right = side === "right" ? "0" : "auto";
+      piece.style.top = `${30 + Math.random() * 40}%`;
+
+      layer.appendChild(piece);
+
+      const angle = (Math.random() * 55 + 15) * (Math.PI / 180);
+      const distance = 140 + Math.random() * 220;
+      const dx = dir * distance * Math.cos(angle);
+      const dy = -distance * Math.sin(angle);
+      const rotate = Math.random() * 720 - 360;
+
+      const animation = piece.animate(
+        [
+          { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`, opacity: 1, offset: 0.7 },
+          { transform: `translate(${dx * 1.1}px, ${dy + 140}px) rotate(${rotate}deg)`, opacity: 0 },
+        ],
+        { duration: 900 + Math.random() * 500, easing: "cubic-bezier(.2,.6,.35,1)", fill: "forwards" }
+      );
+      animation.onfinish = () => piece.remove();
+    }
+  });
 }
 
 // ---------- Toast ----------
