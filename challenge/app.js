@@ -406,7 +406,7 @@ function fireConfetti() {
 
   ["left", "right"].forEach((side) => {
     const dir = side === "left" ? 1 : -1;
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 80; i++) {
       const piece = document.createElement("div");
       piece.className = "confetti-piece";
 
@@ -422,7 +422,7 @@ function fireConfetti() {
       layer.appendChild(piece);
 
       const angle = (Math.random() * 55 + 15) * (Math.PI / 180);
-      const distance = 140 + Math.random() * 220;
+      const distance = 180 + Math.random() * 320;
       const dx = dir * distance * Math.cos(angle);
       const dy = -distance * Math.sin(angle);
       const rotate = Math.random() * 720 - 360;
@@ -430,10 +430,10 @@ function fireConfetti() {
       const animation = piece.animate(
         [
           { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
-          { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`, opacity: 1, offset: 0.7 },
-          { transform: `translate(${dx * 1.1}px, ${dy + 140}px) rotate(${rotate}deg)`, opacity: 0 },
+          { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`, opacity: 1, offset: 0.5 },
+          { transform: `translate(${dx * 1.15}px, ${dy + 320}px) rotate(${rotate * 1.5}deg)`, opacity: 0 },
         ],
-        { duration: 900 + Math.random() * 500, easing: "cubic-bezier(.2,.6,.35,1)", fill: "forwards" }
+        { duration: 2200 + Math.random() * 1400, delay: Math.random() * 500, easing: "cubic-bezier(.2,.6,.35,1)", fill: "forwards" }
       );
       animation.onfinish = () => piece.remove();
     }
