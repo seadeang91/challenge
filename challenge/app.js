@@ -221,17 +221,6 @@ function renderCalendar() {
       num.className = "plainday";
       num.textContent = cell.day;
       div.appendChild(num);
-
-      if (status === "partial") {
-        const r = state.records[key];
-        const dots = document.createElement("div");
-        dots.className = "status-dot";
-        dots.innerHTML = `
-          <span class="school ${r.school === "fail" ? "fail" : ""}" style="${!r.school ? "opacity:.25" : ""}"></span>
-          <span class="academy ${r.academy === "fail" ? "fail" : ""}" style="${!r.academy ? "opacity:.25" : ""}"></span>
-        `;
-        div.appendChild(dots);
-      }
     }
 
     div.addEventListener("click", () => openModal(key));

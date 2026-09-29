@@ -260,31 +260,14 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   color: var(--fail);
 }
 
-.day-cell .status-dot {
-  position: absolute;
-  bottom: 2px;
-  display: flex;
-  gap: 2px;
-  pointer-events: none;
-}
-
-.day-cell .status-dot span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-}
-
-.day-cell .status-dot .school { background: var(--accent); }
-.day-cell .status-dot .academy { background: var(--stamp-ring); }
-.day-cell .status-dot span.fail { background: var(--fail); }
-
 .day-cell.has-note::after {
   content: "";
   position: absolute;
-  top: 22%;
-  right: 22%;
-  width: 3px;
-  height: 3px;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--accent);
   pointer-events: none;
