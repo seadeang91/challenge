@@ -22,6 +22,7 @@ const els = {
   modalDate: document.getElementById("modalDate"),
   modalResult: document.getElementById("modalResult"),
   modalClose: document.getElementById("modalClose"),
+  dayNote: document.getElementById("dayNote"),
   doneBtn: document.getElementById("doneBtn"),
   clearDayBtn: document.getElementById("clearDayBtn"),
   toast: document.getElementById("toast"),
@@ -321,11 +322,13 @@ function openModal(key) {
     });
   });
 
+  els.dayNote.value = record.note || "";
   updateModalResult();
   els.modalBackdrop.classList.add("open");
 }
 
 function closeModal() {
+  flushNote();
   els.modalBackdrop.classList.remove("open");
   state.selectedDate = null;
   if (pendingConfetti) {
@@ -359,7 +362,7 @@ function setChoice(category, value) {
     record[category] = value;
   }
 
-  if (!record.school && !record.academy) {
+  if (!record.school && !record.academy && !record.note) {
     delete state.records[key];
   }
 
@@ -383,13 +386,41 @@ function setChoice(category, value) {
   }
 }
 
+let noteTimer = null;
+
+function commitNote() {
+  const key = state.selectedDate;
+  if (!key) return;
+  const text = els.dayNote.value.trim();
+  const record = state.records[key] || {};
+  if ((record.note || "") === text) return;
+  if (text) {
+    record.note = text;
+    state.records[key] = record;
+  } else {
+    delete record.note;
+    if (!record.school && !record.academy) delete state.records[key];
+  }
+  saveRecords();
+}
+
+function flushNote() {
+  if (noteTimer === null) return;
+  clearTimeout(noteTimer);
+  noteTimer = null;
+  commitNote();
+}
+
 function clearDay() {
   const key = state.selectedDate;
   if (!key) return;
   pendingConfetti = false;
   state.justStampedKey = null;
+  clearTimeout(noteTimer);
+  noteTimer = null;
   delete state.records[key];
   saveRecords();
+  els.dayNote.value = "";
   document.querySelectorAll(".choice").forEach((btn) => btn.classList.remove("active"));
   updateModalResult();
   renderCalendar();
@@ -476,6 +507,14 @@ document.querySelectorAll(".category .choice").forEach((btn) => {
     const category = btn.closest(".category").dataset.category;
     setChoice(category, btn.dataset.value);
   });
+});
+
+els.dayNote.addEventListener("input", () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    noteTimer = null;
+    commitNote();
+  }, 600);
 });
 
 els.modalClose.addEventListener("click", closeModal);

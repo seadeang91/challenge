@@ -541,6 +541,24 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   color: var(--fail);
 }
 
+.day-note {
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #d6e6f2;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+}
+
+.day-note:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .modal-result {
   text-align: center;
   min-height: 28px;
