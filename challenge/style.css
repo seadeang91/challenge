@@ -278,6 +278,21 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 .day-cell .status-dot .academy { background: var(--stamp-ring); }
 .day-cell .status-dot span.fail { background: var(--fail); }
 
+.day-cell.has-note::after {
+  content: "";
+  position: absolute;
+  top: 22%;
+  right: 22%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.day-cell.has-note.today::after { background: #fff; }
+.day-cell.has-note.partial::after { background: var(--fail); }
+
 .stampwrap {
   position: relative;
   width: 100%;
