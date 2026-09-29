@@ -22,6 +22,7 @@ const els = {
   modalDate: document.getElementById("modalDate"),
   modalResult: document.getElementById("modalResult"),
   modalClose: document.getElementById("modalClose"),
+  dayNote: document.getElementById("dayNote"),
   doneBtn: document.getElementById("doneBtn"),
   clearDayBtn: document.getElementById("clearDayBtn"),
   toast: document.getElementById("toast"),
@@ -197,6 +198,7 @@ function renderCalendar() {
     if (key === todayKey) div.classList.add("today");
     if (status === "stamped") div.classList.add("stamped");
     if (status === "partial") div.classList.add("partial");
+    if (state.records[key] && state.records[key].note) div.classList.add("has-note");
     if (HOLIDAYS[key]) {
       div.classList.add("holiday");
       div.title = HOLIDAYS[key];
@@ -219,17 +221,6 @@ function renderCalendar() {
       num.className = "plainday";
       num.textContent = cell.day;
       div.appendChild(num);
-
-      if (status === "partial") {
-        const r = state.records[key];
-        const dots = document.createElement("div");
-        dots.className = "status-dot";
-        dots.innerHTML = `
-          <span class="school ${r.school === "fail" ? "fail" : ""}" style="${!r.school ? "opacity:.25" : ""}"></span>
-          <span class="academy ${r.academy === "fail" ? "fail" : ""}" style="${!r.academy ? "opacity:.25" : ""}"></span>
-        `;
-        div.appendChild(dots);
-      }
     }
 
     div.addEventListener("click", () => openModal(key));
@@ -321,11 +312,13 @@ function openModal(key) {
     });
   });
 
+  els.dayNote.value = record.note || "";
   updateModalResult();
   els.modalBackdrop.classList.add("open");
 }
 
 function closeModal() {
+  flushNote();
   els.modalBackdrop.classList.remove("open");
   state.selectedDate = null;
   if (pendingConfetti) {
@@ -359,7 +352,7 @@ function setChoice(category, value) {
     record[category] = value;
   }
 
-  if (!record.school && !record.academy) {
+  if (!record.school && !record.academy && !record.note) {
     delete state.records[key];
   }
 
@@ -383,13 +376,41 @@ function setChoice(category, value) {
   }
 }
 
+let noteTimer = null;
+
+function commitNote() {
+  const key = state.selectedDate;
+  if (!key) return;
+  const text = els.dayNote.value.trim();
+  const record = state.records[key] || {};
+  if ((record.note || "") === text) return;
+  if (text) {
+    record.note = text;
+    state.records[key] = record;
+  } else {
+    delete record.note;
+    if (!record.school && !record.academy) delete state.records[key];
+  }
+  saveRecords();
+}
+
+function flushNote() {
+  if (noteTimer === null) return;
+  clearTimeout(noteTimer);
+  noteTimer = null;
+  commitNote();
+}
+
 function clearDay() {
   const key = state.selectedDate;
   if (!key) return;
   pendingConfetti = false;
   state.justStampedKey = null;
+  clearTimeout(noteTimer);
+  noteTimer = null;
   delete state.records[key];
   saveRecords();
+  els.dayNote.value = "";
   document.querySelectorAll(".choice").forEach((btn) => btn.classList.remove("active"));
   updateModalResult();
   renderCalendar();
@@ -406,7 +427,7 @@ function fireConfetti() {
 
   ["left", "right"].forEach((side) => {
     const dir = side === "left" ? 1 : -1;
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 80; i++) {
       const piece = document.createElement("div");
       piece.className = "confetti-piece";
 
@@ -422,7 +443,7 @@ function fireConfetti() {
       layer.appendChild(piece);
 
       const angle = (Math.random() * 55 + 15) * (Math.PI / 180);
-      const distance = 140 + Math.random() * 220;
+      const distance = 180 + Math.random() * 320;
       const dx = dir * distance * Math.cos(angle);
       const dy = -distance * Math.sin(angle);
       const rotate = Math.random() * 720 - 360;
@@ -430,10 +451,10 @@ function fireConfetti() {
       const animation = piece.animate(
         [
           { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
-          { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`, opacity: 1, offset: 0.7 },
-          { transform: `translate(${dx * 1.1}px, ${dy + 140}px) rotate(${rotate}deg)`, opacity: 0 },
+          { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`, opacity: 1, offset: 0.5 },
+          { transform: `translate(${dx * 1.15}px, ${dy + 320}px) rotate(${rotate * 1.5}deg)`, opacity: 0 },
         ],
-        { duration: 900 + Math.random() * 500, easing: "cubic-bezier(.2,.6,.35,1)", fill: "forwards" }
+        { duration: 2200 + Math.random() * 1400, delay: Math.random() * 500, easing: "cubic-bezier(.2,.6,.35,1)", fill: "forwards" }
       );
       animation.onfinish = () => piece.remove();
     }
@@ -476,6 +497,14 @@ document.querySelectorAll(".category .choice").forEach((btn) => {
     const category = btn.closest(".category").dataset.category;
     setChoice(category, btn.dataset.value);
   });
+});
+
+els.dayNote.addEventListener("input", () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => {
+    noteTimer = null;
+    commitNote();
+  }, 600);
 });
 
 els.modalClose.addEventListener("click", closeModal);
