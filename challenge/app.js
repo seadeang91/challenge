@@ -198,6 +198,7 @@ function renderCalendar() {
     if (key === todayKey) div.classList.add("today");
     if (status === "stamped") div.classList.add("stamped");
     if (status === "partial") div.classList.add("partial");
+    if (state.records[key] && state.records[key].note) div.classList.add("has-note");
     if (HOLIDAYS[key]) {
       div.classList.add("holiday");
       div.title = HOLIDAYS[key];
