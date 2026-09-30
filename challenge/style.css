@@ -260,22 +260,6 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
   color: var(--fail);
 }
 
-.day-cell.has-note::after {
-  content: "";
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  pointer-events: none;
-}
-
-.day-cell.has-note.today::after { background: #fff; }
-.day-cell.has-note.partial::after { background: var(--fail); }
-
 .stampwrap {
   position: relative;
   width: 100%;
@@ -503,6 +487,7 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 }
 
 .category-label {
+  display: block;
   font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 8px;
@@ -540,6 +525,7 @@ h1, h2, .jua, .stat-box .num, .day-num, #monthLabel {
 }
 
 .day-note {
+  display: block;
   width: 100%;
   box-sizing: border-box;
   resize: none;
